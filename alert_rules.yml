@@ -1,0 +1,53 @@
+groups:
+  - name: system_alerts
+    rules:
+
+    # CPU Usage Alert
+    - alert: HighCPUUsage
+      expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "High CPU Usage on {{ $labels.instance }}"
+        description: "CPU usage is above 80% for more than 1 minute on instance {{ $labels.instance }}."
+
+    # Memory Usage Alert
+    - alert: HighMemoryUsage
+      expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 20
+      for: 1m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Low Memory on {{ $labels.instance }}"
+        description: "Available memory is less than 20% on instance {{ $labels.instance }}."
+
+    # Disk Usage Alert
+    - alert: HighDiskUsage
+      expr: (node_filesystem_size_bytes - node_filesystem_avail_bytes) / node_filesystem_size_bytes * 100 > 80
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "High Disk Usage on {{ $labels.instance }}"
+        description: "Disk usage is above 80% on instance {{ $labels.instance }}."
+
+    # System Load Alert
+    - alert: HighSystemLoad
+      expr: node_load1 > 4
+      for: 1m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High Load on {{ $labels.instance }}"
+        description: "The system load is above 4 on instance {{ $labels.instance }}."
+
+    # SQL Query Handling Alert
+    - alert: HighSQLQueryLoad
+      expr: rate(mysql_global_status_questions[1m]) > 500
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "High SQL Query Load on {{ $labels.instance }}"
+        description: "The MySQL server is handling more than 500 queries per second on instance {{ $labels.instance }}."
